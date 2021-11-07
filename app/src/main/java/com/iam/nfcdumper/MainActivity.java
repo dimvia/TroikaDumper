@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             info.append("\n\n  --- Данные карты: ---\n");
             info.append("\nНомер карты:         " + dump.getCardNumberAsString());
             info.append("\nБаланс:              " + dump.getBalanceAsString());
-            info.append("\nДата использование:  " + dump.getLastUsageDateAsString());
+            info.append("\nДата использования:  " + dump.getLastUsageDateAsString());
             info.append("\nПоследний валидатор: " + dump.getLastValidatorIdAsString());
 
             dump.modifyBalance();
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             info.append("\n\n  --- Данные для записи: ---\n");
             info.append("\nНомер карты:         " + dump.getCardNumberAsString());
             info.append("\nБаланс:              " + dump.getBalanceAsString() + " (+42)");
-            info.append("\nДата использование:  " + dump.getLastUsageDateAsString());
+            info.append("\nДата использования:  " + dump.getLastUsageDateAsString());
             info.append("\nПоследний валидатор: " + dump.getLastValidatorIdAsString());
 
             dump.revertBalance();
