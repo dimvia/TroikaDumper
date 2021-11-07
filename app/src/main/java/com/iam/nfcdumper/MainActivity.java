@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
             info.append("\nДата использования:  " + dump.getLastUsageDateAsString());
             info.append("\nПоследний валидатор: " + dump.getLastValidatorIdAsString());
 
-            dump.revertBalance();
+            //dump.revertBalance();
 
             info.append("\n\nНажмите на кнопку справа внизу для записи новых данных на карту");
 

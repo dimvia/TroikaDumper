@@ -121,12 +121,10 @@ public class Dump {
             lastUsageDate = null;
         }
 
-        //data[1][5] = (byte) (data[1][5]+5); //MODIFICATION
         balance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;
     }
 
     public void write(Tag tag) throws IOException {
-        this.modifyBalance();
         MifareClassic mfc = getMifareClassic(tag);
 
         if (!Arrays.equals(tag.getId(), this.getUid())) {
@@ -140,7 +138,6 @@ public class Dump {
         for (int i = 0; i < numBlocksToWrite; i++) {
             mfc.writeBlock(startBlockIndex + i, data[i]);
         }
-        this.revertBalance();
     }
 
     public File save(File dir) throws IOException {
