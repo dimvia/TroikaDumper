@@ -39,7 +39,7 @@ public class Dump {
     // raw
     protected byte[] uid;
     protected byte[][] data;
-    protected byte[][] data_new;
+    protected byte[][] data_original;
 
     // parsed
     protected int cardNumber;
@@ -50,6 +50,7 @@ public class Dump {
     public Dump(byte[] uid, byte[][] sector8) {
         this.uid = uid;
         this.data = sector8;
+        this.data_original = this.data;
         parse();
     }
 
@@ -109,7 +110,7 @@ public class Dump {
         //TODO: find correct field for validator ID
         lastValidatorId = intval(data[1][0], data[1][1]);
 
-        data[1][2] = (byte) (data[1][2]+1); //MODIFICATION
+        //data[1][2] = (byte) (data[1][2]+1); //MODIFICATION
         int minutesDelta = intval((byte) (data[1][0]), (byte) (data[1][1]), (byte) (data[1][2])) >> 1;
         if (minutesDelta > 0) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+3"));
@@ -120,11 +121,12 @@ public class Dump {
             lastUsageDate = null;
         }
 
-        data[1][5] = (byte) (data[1][5]+1); //MODIFICATION
+        //data[1][5] = (byte) (data[1][5]+5); //MODIFICATION
         balance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;
     }
 
     public void write(Tag tag) throws IOException {
+        this.modifyBalance();
         MifareClassic mfc = getMifareClassic(tag);
 
         if (!Arrays.equals(tag.getId(), this.getUid())) {
@@ -138,6 +140,7 @@ public class Dump {
         for (int i = 0; i < numBlocksToWrite; i++) {
             mfc.writeBlock(startBlockIndex + i, data[i]);
         }
+        this.revertBalance();
     }
 
     public File save(File dir) throws IOException {
@@ -221,6 +224,26 @@ public class Dump {
 
     public String getBalanceAsString() {
         return "" + getBalance() + " RUB";
+    }
+
+    public void modifyBalance(){
+        int previousBalance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;;
+        data[1][5] = (byte) (data[1][5]+4); //MODIFICATION
+        while(intval((byte) (data[1][5]), (byte) data[1][6]) / 25 - previousBalance < 42) {
+            data[1][6] = (byte) (data[1][6] + 1); //MODIFICATION
+        }
+        balance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;
+    }
+
+    public void revertBalance(){
+        data[1][5] = data_original[1][5]; //MODIFICATION
+        data[1][6] = data_original[1][6]; //MODIFICATION
+        /*int previousBalance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;;
+        data[1][5] = (byte) (data[1][5]-4); //MODIFICATION
+        while(previousBalance - intval((byte) (data[1][5]), (byte) data[1][6]) / 25 < 42) {
+            data[1][6] = (byte) (data[1][6] - 1); //MODIFICATION
+        }*/
+        balance = intval((byte) (data[1][5]), (byte) data[1][6]) / 25;
     }
 
     public int getCardNumber() {

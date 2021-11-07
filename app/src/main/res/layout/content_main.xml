@@ -11,7 +11,7 @@
     android:background="@drawable/background"
     >
 
-    <TextView android:text="Ready" android:layout_width="wrap_content"
+    <TextView android:text="Приложите карту тройка" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView"
         android:typeface="monospace"

@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
     final static int REQUEST_OPEN_DUMP = 1;
     final static String INTENT_READ_DUMP = "cc.troikadumper.INTENT_READ_DUMP";
 
-    protected FloatingActionButton btnLoad;
     protected FloatingActionButton btnWrite;
     protected TextView info;
 
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         pendingWriteDialog = new ProgressDialog(MainActivity.this);
         pendingWriteDialog.setIndeterminate(true);
-        pendingWriteDialog.setMessage("Waiting for card...");
+        pendingWriteDialog.setMessage("Приложите карту тройка...");
         pendingWriteDialog.setCancelable(true);
         pendingWriteDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -75,14 +74,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 writeMode = true;
                 pendingWriteDialog.show();
-            }
-        });
-        btnLoad = (FloatingActionButton) findViewById(R.id.btn_load);
-        btnLoad.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), DumpListActivity.class);
-                startActivityForResult(intent, REQUEST_OPEN_DUMP);
             }
         });
 
@@ -162,41 +153,49 @@ public class MainActivity extends AppCompatActivity {
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
                 if (writeMode && dump != null) {
                     pendingWriteDialog.hide();
-                    info.append("Writing to card...");
+                    info.append("Запись на карту...");
                     dump.write(tag);
                 } else {
-                    info.append("Reading from card...");
+                    info.append("Чтение карты...");
                     dump = Dump.fromTag(tag);
                     shouldSave = true;
                 }
             } else if (INTENT_READ_DUMP.equals(action)) {
                 File file = new File(dumpsDir, intent.getStringExtra("filename"));
-                info.append("Reading from file...");
+                info.append("Чтение из файла...");
                 dump = Dump.fromFile(file);
             }
 
             info.append("\nCard UID: " + dump.getUidAsString());
-            info.append("\n\n  --- Sector #8: ---\n");
-            String[] blocks = dump.getDataAsStrings();
-            for (int i = 0; i < blocks.length; i++) {
-                info.append("\n" + i + "] " + blocks[i]);
-            }
-            info.append("\n\n  --- Extracted data: ---\n");
-            info.append("\nCard number:      " + dump.getCardNumberAsString());
-            info.append("\nCurrent balance:  " + dump.getBalanceAsString());
-            info.append("\nLast usage date:  " + dump.getLastUsageDateAsString());
-            info.append("\nLast validator:   " + dump.getLastValidatorIdAsString());
+
+            info.append("\n\n  --- Данные карты: ---\n");
+            info.append("\nНомер карты:         " + dump.getCardNumberAsString());
+            info.append("\nБаланс:              " + dump.getBalanceAsString());
+            info.append("\nДата использование:  " + dump.getLastUsageDateAsString());
+            info.append("\nПоследний валидатор: " + dump.getLastValidatorIdAsString());
+
+            dump.modifyBalance();
+
+            info.append("\n\n  --- Данные для записи: ---\n");
+            info.append("\nНомер карты:         " + dump.getCardNumberAsString());
+            info.append("\nБаланс:              " + dump.getBalanceAsString() + " (+42)");
+            info.append("\nДата использование:  " + dump.getLastUsageDateAsString());
+            info.append("\nПоследний валидатор: " + dump.getLastValidatorIdAsString());
+
+            dump.revertBalance();
+
+            info.append("\n\nНажмите на кнопку справа внизу для записи новых данных на карту");
 
             if (shouldSave) {
-                info.append("\n\n Saving dump ... ");
+                /*info.append("\n\n Saving dump ... ");
                 File save = dump.save(dumpsDir);
-                info.append("\n " + save.getCanonicalPath());
+                info.append("\n " + save.getCanonicalPath());*/
             }
             if (writeMode) {
-                info.append("\n\n Successfully wrote this dump!");
+                info.append("\n\n Данные карты изменены!");
             }
         } catch (IOException e) {
-            info.append("\nError: \n" + e.toString());
+            info.append("\nОшибка: \n" + e.toString());
             dump = null;
         } finally {
             if (writeMode) {
